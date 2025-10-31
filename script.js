@@ -8,6 +8,7 @@
 (() => {
   const stage = document.getElementById('stage');
   const scoreEl = document.getElementById('score');
+  const highScoreEl = document.getElementById('highScore');
   const overlay = document.getElementById('overlay');
   const overlayTitle = document.getElementById('overlay-title');
   const overlayScore = document.getElementById('overlay-score');
@@ -19,6 +20,10 @@
 
   const STAGE_W = 360; // virtual width for layout
   let stageRect = null;
+
+  // High score management
+  let highScore = parseInt(localStorage.getItem('flyingModiHighScore') || '0');
+  highScoreEl.innerText = highScore;
 
   // Create player element
   const player = document.createElement('div');
@@ -185,6 +190,16 @@
   function endGame() {
     state.running = false;
     
+    // Check and update high score
+    if (state.score > highScore) {
+      highScore = state.score;
+      localStorage.setItem('flyingModiHighScore', highScore.toString());
+      highScoreEl.innerText = highScore;
+      overlayTitle.innerText = 'New High Score!';
+    } else {
+      overlayTitle.innerText = 'Game Over';
+    }
+    
     // Stop background music
     bgMusic.pause();
     
@@ -192,9 +207,8 @@
     gameOverSound.currentTime = 0;
     gameOverSound.play().catch(e => console.log('Game over sound failed:', e));
     
-    // Show game over overlay with current score
-    overlayScore.innerText = 'Score: ' + state.score;
-    overlayTitle.innerText = 'Game Over';
+    // Show game over overlay with current score and high score
+    overlayScore.innerHTML = `Score: ${state.score}<br><small class="text-gray-500">Best: ${highScore}</small>`;
     overlay.style.display = 'flex';
     overlay.style.pointerEvents = 'auto'; // Enable clicking on restart button
   }
@@ -278,3 +292,4 @@
   });
 
 })();
+
